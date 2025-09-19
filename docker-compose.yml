@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  oracle:
+    build: ./oracle
+    container_name: oracle-xe
+    ports:
+      - "1521:1521"
+    environment:
+      ORACLE_PASSWORD: oracle
+      APP_USER: appuser
+      APP_USER_PASSWORD: appuserpwd
+    volumes:
+      - oracle_data:/opt/oracle/oradata
+
+  gitlab:
+    build: ./gitlab
+    container_name: gitlab
+    hostname: gitlab.local
+    ports:
+      - "8080:80"
+      - "8443:443"
+      - "2222:22"
+    volumes:
+      - gitlab_config:/etc/gitlab
+      - gitlab_logs:/var/log/gitlab
+      - gitlab_data:/var/opt/gitlab
+    shm_size: "256m"
+
+  runner:
+    image: gitlab/gitlab-runner:latest
+    container_name: gitlab-runner
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - gitlab_runner_config:/etc/gitlab-runner
+
+volumes:
+  oracle_data:
+  gitlab_config:
+  gitlab_logs:
+  gitlab_data:
+  gitlab_runner_config:
